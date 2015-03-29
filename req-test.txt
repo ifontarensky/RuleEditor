@@ -1,0 +1,4 @@
+mock
+coverage
+pylint
+nose
