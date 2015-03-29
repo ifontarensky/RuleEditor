@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+@author:       Ivan Fontarensky
+@license:      GNU General Public License 3.0
+@contact:      ivan.fontarensky_at_gmail.com
+"""
+
+
+__docformat__ = 'restructuredtext'
+
+
+
+import sip
+sip.setapi('QVariant', 2)
+sip.setapi('QString', 2)
+
+import sys,os
+
+from PyQt4 import QtGui
+
+from ruleeditor.ui.mainwindow import Ui_MainWindow
+
+
+class app:
+    index=-1
+    def __init__(self,args):
+        """The application launcher.
+
+        First of all, translators are loaded. Then the GUI is shown and the events
+        loop is started.
+        """
+
+        # Create QT Application
+        self.app=QtGui.QApplication(args)
+        from ruleeditor.core.reapp import REApp
+
+
+        # Specify the organization's Internet domain. When the Internet
+        # domain is set, it is used on Mac OS X instead of the organization
+        # name, since Mac OS X applications conventionally use Internet
+        # domains to identify themselves
+        self.app.setOrganizationDomain('https://github.com/ifontarensky')
+        self.app.setOrganizationName('RuleEditor')
+        self.app.setApplicationName('RuleEditor')
+
+
+        # Start the application
+        reapp = REApp()
+        reapp.gui.show()
+        sys.exit(self.app.exec_())
+
+
+
+def main(args):
+    mapp = app(args)
+
+if __name__=="__main__":
+    main(sys.argv)
+
+
+# vim:ts=4:expandtab:sw=4

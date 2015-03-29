@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1224</width>
+    <height>629</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QDockWidget" name="dockBrowser">
+      <property name="maximumSize">
+       <size>
+        <width>400</width>
+        <height>524287</height>
+       </size>
+      </property>
+      <widget class="QWidget" name="widgetBrowser">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QTreeView" name="browser">
+          <property name="minimumSize">
+           <size>
+            <width>400</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>400</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="tabContent">
+      <property name="minimumSize">
+       <size>
+        <width>400</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Untitled *</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1224</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew"/>
+    <addaction name="actionOpen"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionSettings"/>
+   </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>?</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
