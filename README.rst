@@ -1,5 +1,5 @@
 
-Install Yara 3.3.0
+Install RuleEditor
 -------------------
 
 :: 
@@ -8,13 +8,17 @@ Install Yara 3.3.0
     $ sudo apt-get install libtool
     $ sudo apt-get install autoconf
     $ sudo apt-get install automake
-    $ sudo apt-get install build-essential libtool autoconf automak
+    $ sudo apt-get install build-essential libtool autoconf automake
 
-a installer dans virtualenv
+
     $ sudo aptitude install qt4-qmake
     $ sudo aptitude install libqt4-dev
 
-# **********************
+
+Install In Virtualenv
+---------------------
+
+::
 
     $ make env
     $ source virtualenv/bin/activate
