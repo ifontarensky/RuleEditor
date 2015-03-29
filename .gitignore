@@ -1,0 +1,14 @@
+*.pyc
+*~
+.coverage
+coverage.xml
+nosetests.xml
+pylint.out
+.idea/
+results/
+cots/
+dependencies/
+/source/build
+virtualenv/
+source_core/ruleeditor/ui/*.py
+requirements/
