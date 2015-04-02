@@ -28,31 +28,21 @@ except AttributeError:
 class Worker(QObject):
 
 
-    def check_yara(self, path, rules, editResult, btnTest):
-        self.editResult = editResult
-        result = list()
-        self.editResult.insertPlainText("\n\nRunning ...\n")
+    def check_yara(self, path, rules):
         if os.path.isdir(path):
             for root, dirs, files in os.walk(path):
-
                 for i in files:
                     n = os.path.join(root, i)
                     try:
                         matches = rules.match(n)
                         if len(matches):
-                            result.append("{0} | {1}".format(n, matches))
+                            self.emit(SIGNAL("notify"), matches, n)
                     except UnicodeEncodeError, err:
                         print "! Error", n, err
-        self.notify_result(result)
-        btnTest.setText("Test")
+        self.emit(SIGNAL("finish"))
 
 
-    def notify_result(self, result):
-        self.editResult.document().clear()
-        self.cursor = self.editResult.textCursor()
-        self.cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-        self.editResult.setTextCursor(self.cursor)
-        self.editResult.insertPlainText("\n".join(result))
+
 
 
 class Editor(object):
@@ -136,8 +126,8 @@ class Editor(object):
     def setupUi(self):
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("Untitled"))
-        self.tabContent.addTab(self.tab, _fromUtf8("Untitled"))
-
+        index = self.tabContent.addTab(self.tab, _fromUtf8("Untitled"))
+        self.tabContent.setCurrentIndex(index)
         self.widgetEditor = self.tab
         self.globalLayout = QtGui.QVBoxLayout(self.widgetEditor)
         self.globalLayout.setMargin(0)
@@ -203,11 +193,11 @@ class Editor(object):
 
 
             QObject.connect(self.wPanel, SIGNAL("check_yara"), self.worker.check_yara)
+            QObject.connect(self.worker, SIGNAL("notify"), self.notify_result)
+            QObject.connect(self.worker, SIGNAL("finish"), self.finish)
 
             self.thread.start()
-            self.wPanel.emit(SIGNAL("check_yara"), path, rules,
-                             self.uiPanel.editResult,
-                             self.uiPanel.btnTest)
+            self.wPanel.emit(SIGNAL("check_yara"), path, rules)
 
             self.uiPanel.btnTest.setText("Stop")
         else:
@@ -221,3 +211,14 @@ class Editor(object):
             self.uiPanel.editResult.setVisible(False)
         else:
             self.uiPanel.editResult.setVisible(True)
+
+    def notify_result(self, rules, path):
+        self.cursor = self.uiPanel.editResult.textCursor()
+        self.cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+        self.uiPanel.editResult.setTextCursor(self.cursor)
+        for rule in rules:
+            self.uiPanel.editResult.insertPlainText("{0} | {1}\n".format(rule, path))
+
+
+    def finish(self):
+        self.uiPanel.btnTest.setText("Test")

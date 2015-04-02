@@ -100,8 +100,6 @@ class Ui_PanelOption(object):
 
 
 
-
-
     def retranslateUi(self, Form):
         Form.setWindowTitle(_translate("Form", "Form", None))
         self.lblPath.setText(_translate("Form", "Malware", None))
