@@ -104,8 +104,8 @@ class Editor(object):
     def setupUi(self):
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("Untitled Snort"))
-        self.tabContent.addTab(self.tab, _fromUtf8("Untitled Snort"))
-
+        index = self.tabContent.addTab(self.tab, _fromUtf8("Untitled Snort"))
+        self.tabContent.setCurrentIndex(index)
         self.widgetEditor = self.tab
         self.globalLayout = QtGui.QVBoxLayout(self.widgetEditor)
         self.globalLayout.setMargin(0)
