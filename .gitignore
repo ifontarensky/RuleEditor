@@ -8,7 +8,12 @@ pylint.out
 results/
 cots/
 dependencies/
-/source/build
+/source_core/build
+/source_plugins/build
 virtualenv/
 source_core/ruleeditor/ui/*.py
 requirements/
+source_core/dist/
+source_core/rule_editor.egg-info/
+source_plugins/dist/
+source_plugins/plugins_ruleeditor.egg-info/

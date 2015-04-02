@@ -49,6 +49,10 @@ install-yara:
 	cd $(REQUIREDIR)/yara-3.3.0 && ./configure --prefix=$(VENVDIR)
 	cd $(REQUIREDIR)/yara-3.3.0 && make
 	cd $(REQUIREDIR)/yara-3.3.0 && make install
+	cd $(REQUIREDIR)/yara-3.3.0/yara-python && python setup.py build
+	cd $(REQUIREDIR)/yara-3.3.0/yara-python && python setup.py install
+	echo "virtualenv/lib" > virtualenv/etc/ld.so.conf
+	ldconfig -f virtualenv/etc/ld.so.conf
 
 install-sip:
 	@echo "Installing SIP $(SIP)..."
@@ -115,4 +119,4 @@ clean-tmp:
 	rm -rf $(SRCCOREDIR)/rule_editor.egg-info
 
 run: clean-tmp install-app install-plugins
-	cd virtualenv && . bin/activate && python bin/rule-editor
+	. $(VENVDIR)/bin/activate; rule-editor
