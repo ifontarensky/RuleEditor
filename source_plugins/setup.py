@@ -16,7 +16,8 @@ setup(
     packages=[
         'ruleeditor',
         'ruleeditor/plugins',
-        'ruleeditor/plugins/yara'
+        'ruleeditor/plugins/yaraeditor',
+        'ruleeditor/plugins/snorteditor'
         ],
     # Metadata
     author = 'Ivan Fontarensky',
