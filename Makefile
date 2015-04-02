@@ -37,6 +37,7 @@ env:
 	cp -r /usr/include/python2.7 $(VENVDIR)/include
 	$(PIP) install -r req-test.txt
 	$(PIP) install -r req-app.txt
+	$(MAKE) install-pyqt
 	$(MAKE) install-yara
 
 install-yara:
@@ -49,10 +50,11 @@ install-yara:
 	cd $(REQUIREDIR)/yara-3.3.0 && ./configure --prefix=$(VENVDIR)
 	cd $(REQUIREDIR)/yara-3.3.0 && make
 	cd $(REQUIREDIR)/yara-3.3.0 && make install
-	cd $(REQUIREDIR)/yara-3.3.0/yara-python && python setup.py build
-	cd $(REQUIREDIR)/yara-3.3.0/yara-python && python setup.py install
-	echo "virtualenv/lib" > virtualenv/etc/ld.so.conf
-	ldconfig -f virtualenv/etc/ld.so.conf
+	cd $(REQUIREDIR)/yara-3.3.0/yara-python && $(VENVDIR)/bin/python setup.py build
+	cd $(REQUIREDIR)/yara-3.3.0/yara-python && $(VENVDIR)/bin/python setup.py install
+	mkdir -p $(VENVDIR)/etc
+	echo "virtualenv/lib" > $(VENVDIR)/etc/ld.so.conf
+	ldconfig -f $(VENVDIR)/etc/ld.so.conf
 
 install-sip:
 	@echo "Installing SIP $(SIP)..."
