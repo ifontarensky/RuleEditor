@@ -52,7 +52,9 @@ class YaraHighlighter(QtGui.QSyntaxHighlighter):
 
         quotationFormat = QtGui.QTextCharFormat()
         quotationFormat.setForeground(QtCore.Qt.darkGreen)
-        self.highlightingRules.append((QtCore.QRegExp("\".*\""),
+        regexp = QtCore.QRegExp("\".*\"")
+        regexp.setMinimal(True)
+        self.highlightingRules.append((regexp,
                 quotationFormat))
 
         functionFormat = QtGui.QTextCharFormat()
