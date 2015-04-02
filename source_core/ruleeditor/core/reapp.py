@@ -70,7 +70,6 @@ class REApp(QtCore.QObject):
         # création de la fenêtre principale
         self.gui=QtGui.QMainWindow()
         self.ui=reGUI.mainwindow.Ui_MainWindow()
-        self.uidialof=Ui_DialogNew()
 
 
         self.actions = {
@@ -237,11 +236,12 @@ class REApp(QtCore.QObject):
 
             plugins[name] = instance
 
-            nRow=+1
+            nRow += 1
 
         newDialog.exec_()
-        plugin_name = ui.listPlugin.selectedItems()[0].text()
-        self.newFileWith(plugins[plugin_name])
+        if len(ui.listPlugin.selectedItems()) > 0:
+            plugin_name = ui.listPlugin.selectedItems()[0].text()
+            self.newFileWith(plugins[plugin_name])
 
 
     def fileOpen(self):
