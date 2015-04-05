@@ -45,10 +45,14 @@ class app:
         self.app.setOrganizationName('RuleEditor')
         self.app.setApplicationName('RuleEditor')
 
-
         # Start the application
         reapp = REApp()
         reapp.gui.show()
+
+        # Open file from command line
+        for path in args[1:]:
+            reapp.loadFile(path)
+
         sys.exit(self.app.exec_())
 
 

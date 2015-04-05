@@ -24,3 +24,9 @@ Install In Virtualenv
     $ source virtualenv/bin/activate
     $ make install-pyqt
     $ make install-app install-plugins
+
+Yara Editor
+-----------
+    To use Yara editor, you need to have libyara.so.3 linked. So in root add :
+    $ sudo ldconfig -f $(VENVDIR)/etc/ld.so.conf
+

@@ -10,6 +10,7 @@
 
 from setuptools import setup
 
+
 setup(
     name = 'plugins-ruleeditor',
     version = '1.0.0',
@@ -17,7 +18,8 @@ setup(
         'ruleeditor',
         'ruleeditor/plugins',
         'ruleeditor/plugins/yaraeditor',
-        'ruleeditor/plugins/snorteditor'
+        'ruleeditor/plugins/snorteditor',
+        'ruleeditor/plugins/ioceditor'
         ],
     # Metadata
     author = 'Ivan Fontarensky',
