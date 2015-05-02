@@ -17,6 +17,7 @@ from ruleeditor.plugins.ioceditor.ioctreewidget import IOCTreeWidget
 from ruleeditor.plugins.ioceditor.highlighter import IOCHighlighter
 from ruleeditor.plugins.codeeditor.codeeditor import CodeEditor
 from ruleeditor.plugins.ioceditor.icons import IOC_XPM
+from ruleeditor.core.REPlugin import REPlugin
 
 from PyQt4.QtCore import QThread
 
@@ -25,14 +26,23 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+class PluginIOCInstance():
 
-class Editor(object):
+    def display_text_view(self):
+        self.iocEditor.setVisible(True)
+        self.iocWidget.setVisible(False)
+
+    def display_tree_view(self):
+        self.iocEditor.setVisible(False)
+        self.iocWidget.setVisible(True)
+
+
+class Editor(REPlugin):
 
 
     def __init__(self):
         self.icon = QtGui.QIcon(QtGui.QPixmap(IOC_XPM))
-        pass
-
+        self.openedfile=dict()
 
     def setupPlugin(self, tabContent):
         """
@@ -62,6 +72,11 @@ class Editor(object):
         """
         return os.path.splitext(path)[1] in self.allowFormat()
 
+    def get_instance(self,path):
+        return self.openedfile[path]
+
+    def add_instance(self, path):
+        self.openedfile[path] = PluginIOCInstance()
 
     def loadFile(self,path):
 
@@ -86,15 +101,17 @@ class Editor(object):
 
         #self.setCurrentFileName(path)
 
-        self.setupUi()
-        position = self.tabContent.addTab(self.tab, _fromUtf8(os.path.basename(path)))
-        self.tab.setObjectName(_fromUtf8(path))
-        self.iocEditor.setPlainText(unistr)
+        self.add_instance(path)
+        inst = self.get_instance(path)
+        self.setupUi(inst)
+        position = self.tabContent.addTab(inst.tab, _fromUtf8(os.path.basename(path)))
+        inst.tab.setObjectName(_fromUtf8(path))
+        inst.iocEditor.setPlainText(unistr)
         self.tabContent.setCurrentIndex(position)
         self.tabContent.setTabIcon(position, self.icon)
 
-        self.iocWidget.load_ioc(unistr)
-        self.path = path
+        inst.iocWidget.load_ioc(unistr)
+        inst.path = path
         return True
 
 
@@ -103,16 +120,18 @@ class Editor(object):
         New File
         :return:
         """
-        self.setupUi()
-        position = self.tabContent.addTab(self.tab, _fromUtf8(path))
-        self.tab.setObjectName(_fromUtf8(path))
+        self.add_instance(path)
+        inst = self.get_instance(path)
+        self.setupUi(inst)
+        position = self.tabContent.addTab(inst.tab, _fromUtf8(path))
+        inst.tab.setObjectName(_fromUtf8(path))
         self.tabContent.setCurrentIndex(position)
         ## Define COlor
         self.tabContent.tabBar().setTabTextColor(position, QtCore.Qt.red)
 
 
-    def get_document(self):
-        return self.iocEditor.document()
+    def get_document(self, path):
+        return self.get_instance(path).iocEditor.document()
 
     def get_icon(self):
         return self.icon
@@ -144,66 +163,59 @@ class Editor(object):
             return None
 
 
-    def setupUi(self):
-        self.tab = QtGui.QWidget()
-        self.tab.setObjectName(_fromUtf8("Untitled IOC"))
-        index = self.tabContent.addTab(self.tab, _fromUtf8("Untitled IOC"))
+    def setupUi(self, inst):
+        inst.tab = QtGui.QWidget()
+        inst.tab.setObjectName(_fromUtf8("Untitled IOC"))
+        index = self.tabContent.addTab(inst.tab, _fromUtf8("Untitled IOC"))
         self.tabContent.setCurrentIndex(index)
         self.tabContent.setTabIcon(index, QtGui.QIcon(QtGui.QPixmap(IOC_XPM)))
 
-        self.widgetEditor = self.tab
-        self.globalLayout = QtGui.QVBoxLayout(self.widgetEditor)
-        self.globalLayout.setMargin(0)
-        self.globalLayout.setObjectName(_fromUtf8("globalLayout"))
+        inst.widgetEditor = inst.tab
+        inst.globalLayout = QtGui.QVBoxLayout(inst.widgetEditor)
+        inst.globalLayout.setMargin(0)
+        inst.globalLayout.setObjectName(_fromUtf8("globalLayout"))
 
         # Create Simple ToolBar for View mode
-        self.widgetViewMode = QtGui.QWidget(self.widgetEditor)
-        self.widgetViewMode.setMaximumSize(QtCore.QSize(16777215, 32))
-        self.widgetViewMode.setObjectName(_fromUtf8("widgetViewMode"))
-        self.horizontalLayout_4 = QtGui.QHBoxLayout(self.widgetViewMode)
-        self.horizontalLayout_4.setMargin(0)
-        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
-        self.btnTreeView = QtGui.QPushButton(self.widgetViewMode)
-        self.btnTreeView.setObjectName(_fromUtf8("btnTreeView"))
-        self.btnTreeView.setText("Tree")
-        self.horizontalLayout_4.addWidget(self.btnTreeView)
-        self.btnTextView = QtGui.QPushButton(self.widgetViewMode)
-        self.btnTextView.setObjectName(_fromUtf8("btnTextView"))
-        self.btnTextView.setText("Text")
-        self.horizontalLayout_4.addWidget(self.btnTextView)
+        inst.widgetViewMode = QtGui.QWidget(inst.widgetEditor)
+        inst.widgetViewMode.setMaximumSize(QtCore.QSize(16777215, 32))
+        inst.widgetViewMode.setObjectName(_fromUtf8("widgetViewMode"))
+        inst.horizontalLayout_4 = QtGui.QHBoxLayout(inst.widgetViewMode)
+        inst.horizontalLayout_4.setMargin(0)
+        inst.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        inst.btnTreeView = QtGui.QPushButton(inst.widgetViewMode)
+        inst.btnTreeView.setObjectName(_fromUtf8("btnTreeView"))
+        inst.btnTreeView.setText("Tree")
+        inst.horizontalLayout_4.addWidget(inst.btnTreeView)
+        inst.btnTextView = QtGui.QPushButton(inst.widgetViewMode)
+        inst.btnTextView.setObjectName(_fromUtf8("btnTextView"))
+        inst.btnTextView.setText("Text")
+        inst.horizontalLayout_4.addWidget(inst.btnTextView)
         spacerItem = QtGui.QSpacerItem(719, 11, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_4.addItem(spacerItem)
-        self.globalLayout.addWidget(self.widgetViewMode)
+        inst.horizontalLayout_4.addItem(spacerItem)
+        inst.globalLayout.addWidget(inst.widgetViewMode)
 
-        self.iocEditor = CodeEditor(self.widgetEditor)
-        self.iocWidget = IOCTreeWidget(self.widgetEditor)
-        self.iocWidget.setupUi()
+        inst.iocEditor = CodeEditor(inst.widgetEditor)
+        inst.iocWidget = IOCTreeWidget(inst.widgetEditor)
+        inst.iocWidget.setupUi()
 
-        self.globalLayout.addWidget(self.iocWidget)
-        self.globalLayout.addWidget(self.iocEditor)
+        inst.globalLayout.addWidget(inst.iocWidget)
+        inst.globalLayout.addWidget(inst.iocEditor)
 
-        self.iocEditor.setVisible(False)
+        inst.iocEditor.setVisible(False)
 
 
-        allStrings = self.iocWidget.elements + self.iocWidget.attrib
+        allStrings = inst.iocWidget.elements + inst.iocWidget.attrib
 
         completer = QtGui.QCompleter(allStrings)
         completer.setCaseSensitivity(Qt.CaseInsensitive)
         completer.setWrapAround(False)
-        self.iocEditor.setCompleter(completer)
+        inst.iocEditor.setCompleter(completer)
 
-        self.highlighter = IOCHighlighter(self.iocEditor.document())
+        inst.highlighter = IOCHighlighter(inst.iocEditor.document())
 
         #Define Actions
-        self.btnTextView.clicked.connect(self.display_text_view)
-        self.btnTreeView.clicked.connect(self.display_tree_view)
+        inst.btnTextView.clicked.connect(inst.display_text_view)
+        inst.btnTreeView.clicked.connect(inst.display_tree_view)
 
 
 
-    def display_text_view(self):
-        self.iocEditor.setVisible(True)
-        self.iocWidget.setVisible(False)
-
-    def display_tree_view(self):
-        self.iocEditor.setVisible(False)
-        self.iocWidget.setVisible(True)

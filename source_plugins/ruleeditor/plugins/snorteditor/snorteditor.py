@@ -16,6 +16,7 @@ from PyQt4.QtCore import (QObject, Qt, QDir, SIGNAL, SLOT)
 from ruleeditor.plugins.codeeditor.codeeditor import CodeEditor as SnortCodeEditor
 from ruleeditor.plugins.snorteditor.highlighter import SnortHighlighter
 from ruleeditor.plugins.snorteditor.icons import SNORT_XPM
+from ruleeditor.core.REPlugin import REPlugin
 
 from PyQt4.QtCore import QThread
 
@@ -26,12 +27,12 @@ except AttributeError:
 
 
 
-class Editor(object):
+class Editor(REPlugin):
 
 
     def __init__(self):
         self.icon = QtGui.QIcon(QtGui.QPixmap(SNORT_XPM))
-        pass
+        self.openedfile=dict()
 
 
     def setupPlugin(self, tabContent):
@@ -84,12 +85,12 @@ class Editor(object):
 
             unistr = text
 
-        #self.setCurrentFileName(path)
-
-        self.setupUi()
-        position = self.tabContent.addTab(self.tab, _fromUtf8(path))
-        self.tab.setObjectName(_fromUtf8(path))
-        self.snortEdit.setPlainText(unistr)
+        self.add_instance(path)
+        inst = self.get_instance(path)
+        self.setupUi(inst)
+        position = self.tabContent.addTab(inst.tab, _fromUtf8(path))
+        inst.tab.setObjectName(_fromUtf8(path))
+        inst.snortEdit.setPlainText(unistr)
         self.tabContent.setCurrentIndex(position)
         self.tabContent.setTabIcon(position, self.icon)
 
@@ -102,13 +103,28 @@ class Editor(object):
         New File
         :return:
         """
-        self.setupUi()
-        position = self.tabContent.addTab(self.tab, _fromUtf8(path))
-        self.tab.setObjectName(_fromUtf8(path))
+        self.add_instance(path)
+        inst = self.get_instance(path)
+        self.setupUi(inst)
+        position = self.tabContent.addTab(inst.tab, _fromUtf8(path))
+        inst.tab.setObjectName(_fromUtf8(path))
         self.tabContent.setCurrentIndex(position)
 
-    def get_document(self):
-        return self.snortEdit.document()
+    def get_document(self, path):
+        """
+
+        :return:
+        """
+        return self.get_instance(path).snortEdit.document()
+
+    def get_instance(self,path):
+        """
+        Get all data for on file
+        :param path:
+        :return:
+        """
+        return self.openedfile[path]
+
 
     def get_icon(self):
         return self.icon
@@ -123,7 +139,7 @@ class Editor(object):
         return True
 
     def fileSaveAs(self, document):
-        fn = QtGui.QFileDialog.getSaveFileName(self.mainwindow, "Save as...", None,
+        fn = QtGui.QFileDialog.getSaveFileName(self.tabContent, "Save as...", None,
                 "Snort files (*.rules *snort);;HTML-Files (*.htm *.html);;All Files (*)")
 
         if not fn:
@@ -140,20 +156,20 @@ class Editor(object):
             return None
 
 
-    def setupUi(self):
-        self.tab = QtGui.QWidget()
-        self.tab.setObjectName(_fromUtf8("Untitled Snort"))
-        index = self.tabContent.addTab(self.tab, _fromUtf8("Untitled Snort"))
+    def setupUi(self, inst):
+        inst.tab = QtGui.QWidget()
+        inst.tab.setObjectName(_fromUtf8("Untitled Snort"))
+        index = self.tabContent.addTab(inst.tab, _fromUtf8("Untitled Snort"))
         self.tabContent.setCurrentIndex(index)
-        self.tabContent.setTabIcon(index, QtGui.QIcon(QtGui.QPixmap(SNORT_XPM)))
-        self.widgetEditor = self.tab
-        self.globalLayout = QtGui.QVBoxLayout(self.widgetEditor)
-        self.globalLayout.setMargin(0)
-        self.globalLayout.setObjectName(_fromUtf8("globalLayout"))
-        self.snortEdit = SnortCodeEditor(self.widgetEditor)
-        self.snortEdit.setObjectName(_fromUtf8("snortEdit"))
-        self.globalLayout.addWidget(self.snortEdit)
-        self.widgetEditor.setAcceptDrops(True)
+        self.tabContent.setTabIcon(index, self.get_icon())
+        inst.widgetEditor = inst.tab
+        inst.globalLayout = QtGui.QVBoxLayout(inst.widgetEditor)
+        inst.globalLayout.setMargin(0)
+        inst.globalLayout.setObjectName(_fromUtf8("globalLayout"))
+        inst.snortEdit = SnortCodeEditor(inst.widgetEditor)
+        inst.snortEdit.setObjectName(_fromUtf8("snortEdit"))
+        inst.globalLayout.addWidget(inst.snortEdit)
+        inst.widgetEditor.setAcceptDrops(True)
 
         allStrings = ["msg", "reference", "gid", "sid", "rev", "classtype",
                       "priority", "metadata", "content", "nocase", "rawbytes",
@@ -180,10 +196,10 @@ class Editor(object):
         completer = QtGui.QCompleter(allStrings)
         completer.setCaseSensitivity(Qt.CaseInsensitive)
         completer.setWrapAround(False)
-        self.snortEdit.setCompleter(completer)
+        inst.snortEdit.setCompleter(completer)
 
         #Create our SnortHighlighter derived from QSyntaxHighlighter
-        self.highlighter = SnortHighlighter(self.get_document())
+        inst.highlighter = SnortHighlighter(inst.snortEdit.document())
 
 
 

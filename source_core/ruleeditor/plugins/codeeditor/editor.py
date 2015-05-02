@@ -18,7 +18,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import (QObject, Qt, QDir, SIGNAL, SLOT)
 
 from ruleeditor.plugins.codeeditor.codeeditor import CodeEditor
-
+from ruleeditor.core.REPlugin import REPlugin
 
 
 try:
@@ -31,10 +31,9 @@ try:
 except ImportError:
     QString = str
 
-class Editor(object):
 
-    def __init__(self):
-        pass
+class Editor(REPlugin):
+
 
     def setupPlugin(self, tabContent):
         """
@@ -53,15 +52,6 @@ class Editor(object):
         """
 
         return [".log", ".txt"]
-
-    def isSupported(self, path):
-        """
-        Return if the path can be support by this Editor
-
-        :param path:
-        :return: Boolean
-        """
-        return os.path.splitext(path)[1] in self.allowFormat()
 
 
     def loadFile(self,path):
@@ -86,11 +76,12 @@ class Editor(object):
             unistr = text
 
         #self.setCurrentFileName(path)
-
-        self.setupUi()
-        self.tabContent.addTab(self.tab, _fromUtf8(path))
-        self.tab.setObjectName(_fromUtf8(path))
-        self.codeEdit.setPlainText(unistr)
+        self.add_instance(path)
+        inst = self.get_instance(path)
+        self.setupUi(inst)
+        self.tabContent.addTab(inst.tab, _fromUtf8(path))
+        inst.tab.setObjectName(_fromUtf8(path))
+        inst.codeEdit.setPlainText(unistr)
 
 
         return True
@@ -101,17 +92,18 @@ class Editor(object):
         New File
         :return:
         """
-        self.setupUi()
-        position = self.tabContent.addTab(self.tab, _fromUtf8(path))
-        self.tab.setObjectName(_fromUtf8(path))
+        self.add_instance(path)
+        inst = self.get_instance(path)
+        self.setupUi(inst)
+        position = self.tabContent.addTab(inst.tab, _fromUtf8(path))
+        inst.tab.setObjectName(_fromUtf8(path))
         self.tabContent.setCurrentIndex(position)
 
 
-    def get_document(self):
-        return self.snortEdit.document()
+    def get_document(self, path):
+        inst = self.get_instance(path)
+        return inst.codeEdit.document()
 
-    def get_icon(self):
-        return None
 
     def fileSave(self, path, document):
 
@@ -122,31 +114,24 @@ class Editor(object):
 
         return True
 
-    def fileSaveAs(self, document):
-        fn = QtGui.QFileDialog.getSaveFileName(self.mainwindow, "Save as...", None,
-                "All Files (*)")
 
-        if not fn:
-            return False
+    def setupUi(self, inst):
+        inst.tab = QtGui.QWidget()
+        inst.tab.setObjectName(_fromUtf8("Untitled"))
+        index = self.tabContent.addTab(inst.tab, _fromUtf8("Untitled"))
+        inst.widgetEditor = inst.tab
+        inst.horizontalLayout = QtGui.QHBoxLayout(inst.widgetEditor)
+        inst.horizontalLayout.setMargin(0)
+        inst.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        inst.codeEdit = CodeEditor(inst.widgetEditor)
+        inst.codeEdit.setObjectName(_fromUtf8("codeEdit"))
+        inst.horizontalLayout.addWidget(inst.codeEdit)
+        inst.widgetEditor.setAcceptDrops(True)
 
-        if self.fileSave(fn, document):
-            return fn
-        else:
-            return None
-
-    def setupUi(self):
-        self.tab = QtGui.QWidget()
-        self.tab.setObjectName(_fromUtf8("Untitled"))
-        index = self.tabContent.addTab(self.tab, _fromUtf8("Untitled"))
-        self.positionTab = index
-        self.widgetEditor = self.tab
-        self.horizontalLayout = QtGui.QHBoxLayout(self.widgetEditor)
-        self.horizontalLayout.setMargin(0)
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.codeEdit = CodeEditor(self.widgetEditor)
-        self.codeEdit.setObjectName(_fromUtf8("codeEdit"))
-        self.horizontalLayout.addWidget(self.codeEdit)
-        self.widgetEditor.setAcceptDrops(True)
+        completer = QtGui.QCompleter([])
+        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        completer.setWrapAround(False)
+        inst.codeEdit.setCompleter(completer)
 
         return
 
