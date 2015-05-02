@@ -17,6 +17,7 @@ from PyQt4.QtCore import (QObject, Qt, QDir, SIGNAL, SLOT)
 from ruleeditor.plugins.codeeditor.codeeditor import CodeEditor as YaraCodeEditor
 from ruleeditor.plugins.yaraeditor.highlighter import YaraHighlighter
 from ruleeditor.plugins.yaraeditor.panelOptions import Ui_PanelOption
+from ruleeditor.plugins.yaraeditor.icons import YARA_XPM
 from PyQt4.QtCore import QThread
 
 try:
@@ -111,16 +112,25 @@ class Editor(object):
         self.tab.setObjectName(_fromUtf8(path))
         self.yaraEdit.setPlainText(unistr)
         self.tabContent.setCurrentIndex(position)
+        self.tabContent.setTabIcon(position, QtGui.QIcon(QtGui.QPixmap(YARA_XPM)))
 
         return True
 
 
-    def newFile(self):
+    def newFile(self, path):
         """
         New File
         :return:
         """
         self.setupUi()
+        position = self.tabContent.addTab(self.tab, _fromUtf8(path))
+        self.tab.setObjectName(_fromUtf8(path))
+        self.tabContent.setCurrentIndex(position)
+        self.tabContent.setTabIcon(position, QtGui.QIcon(QtGui.QPixmap(YARA_XPM)))
+
+
+    def get_document(self):
+        return self.yaraEdit.document()
 
 
     def setupUi(self):
@@ -128,6 +138,7 @@ class Editor(object):
         self.tab.setObjectName(_fromUtf8("Untitled"))
         index = self.tabContent.addTab(self.tab, _fromUtf8("Untitled"))
         self.tabContent.setCurrentIndex(index)
+        self.tabContent.setTabIcon(index, QtGui.QIcon(QtGui.QPixmap(YARA_XPM)))
         self.widgetEditor = self.tab
         self.globalLayout = QtGui.QVBoxLayout(self.widgetEditor)
         self.globalLayout.setMargin(0)

@@ -15,6 +15,7 @@ from PyQt4.QtCore import (QObject, Qt, QDir, SIGNAL, SLOT)
 
 from ruleeditor.plugins.codeeditor.codeeditor import CodeEditor as SnortCodeEditor
 from ruleeditor.plugins.snorteditor.highlighter import SnortHighlighter
+from ruleeditor.plugins.snorteditor.icons import SNORT_XPM
 
 from PyQt4.QtCore import QThread
 
@@ -89,23 +90,31 @@ class Editor(object):
         self.tab.setObjectName(_fromUtf8(path))
         self.snortEdit.setPlainText(unistr)
         self.tabContent.setCurrentIndex(position)
+        self.tabContent.setTabIcon(position, QtGui.QIcon(QtGui.QPixmap(SNORT_XPM)))
+
 
         return True
 
 
-    def newFile(self):
+    def newFile(self, path):
         """
         New File
         :return:
         """
         self.setupUi()
+        position = self.tabContent.addTab(self.tab, _fromUtf8(path))
+        self.tab.setObjectName(_fromUtf8(path))
+        self.tabContent.setCurrentIndex(position)
 
+    def get_document(self):
+        return self.snortEdit.document()
 
     def setupUi(self):
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("Untitled Snort"))
         index = self.tabContent.addTab(self.tab, _fromUtf8("Untitled Snort"))
         self.tabContent.setCurrentIndex(index)
+        self.tabContent.setTabIcon(index, QtGui.QIcon(QtGui.QPixmap(SNORT_XPM)))
         self.widgetEditor = self.tab
         self.globalLayout = QtGui.QVBoxLayout(self.widgetEditor)
         self.globalLayout.setMargin(0)
@@ -143,8 +152,7 @@ class Editor(object):
         self.snortEdit.setCompleter(completer)
 
         #Create our SnortHighlighter derived from QSyntaxHighlighter
-        self.snortEdit = self.snortEdit
-        self.highlighter = SnortHighlighter(self.snortEdit.document())
+        self.highlighter = SnortHighlighter(self.get_document())
 
 
 

@@ -16,7 +16,7 @@ from PyQt4.QtCore import (QObject, Qt, QDir, SIGNAL, SLOT)
 from ruleeditor.plugins.ioceditor.ioctreewidget import IOCTreeWidget
 from ruleeditor.plugins.ioceditor.highlighter import IOCHighlighter
 from ruleeditor.plugins.codeeditor.codeeditor import CodeEditor
-
+from ruleeditor.plugins.ioceditor.icons import IOC_XPM
 
 from PyQt4.QtCore import QThread
 
@@ -24,7 +24,6 @@ try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
-
 
 
 class Editor(object):
@@ -91,18 +90,28 @@ class Editor(object):
         self.tab.setObjectName(_fromUtf8(path))
         self.iocEditor.setPlainText(unistr)
         self.tabContent.setCurrentIndex(position)
-        
+        self.tabContent.setTabIcon(position, QtGui.QIcon(QtGui.QPixmap(IOC_XPM)))
+
         self.iocWidget.load_ioc(unistr)
         self.path = path
         return True
 
 
-    def newFile(self):
+    def newFile(self, path):
         """
         New File
         :return:
         """
         self.setupUi()
+        position = self.tabContent.addTab(self.tab, _fromUtf8(path))
+        self.tab.setObjectName(_fromUtf8(path))
+        self.tabContent.setCurrentIndex(position)
+        ## Define COlor
+        self.tabContent.tabBar().setTabTextColor(position, QtCore.Qt.red)
+
+
+    def get_document(self):
+        return self.iocEditor.document()
 
 
     def setupUi(self):
@@ -110,11 +119,12 @@ class Editor(object):
         self.tab.setObjectName(_fromUtf8("Untitled IOC"))
         index = self.tabContent.addTab(self.tab, _fromUtf8("Untitled IOC"))
         self.tabContent.setCurrentIndex(index)
+        self.tabContent.setTabIcon(index, QtGui.QIcon(QtGui.QPixmap(IOC_XPM)))
+
         self.widgetEditor = self.tab
         self.globalLayout = QtGui.QVBoxLayout(self.widgetEditor)
         self.globalLayout.setMargin(0)
         self.globalLayout.setObjectName(_fromUtf8("globalLayout"))
-
 
         # Create Simple ToolBar for View mode
         self.widgetViewMode = QtGui.QWidget(self.widgetEditor)
