@@ -85,6 +85,8 @@ class REApp(QtCore.QObject):
             pluginsLoader.PluginsLoader([], [])
         self.plugins_mgr.loadAll()
 
+        # Map Tree to know wich file are opened,
+        self.mapdocuments = dict()
 
         # affichage de la fenêtre principal
         self.ui.setupUi(self.gui)
@@ -100,6 +102,8 @@ class REApp(QtCore.QObject):
         self.actions["menu"] = {
             "new" : self.ui.actionNew,
             "open" : self.ui.actionOpen,
+            "save" : self.ui.actionSave,
+            "saveas" : self.ui.actionSaveAs,
             "settings" : self.ui.actionSettings
         }
 
@@ -111,6 +115,14 @@ class REApp(QtCore.QObject):
             self.actions["menu"]["open"],
             QtCore.SIGNAL(_fromUtf8("triggered()")),
             self.fileOpen)
+        QtCore.QObject.connect(
+            self.actions["menu"]["save"],
+            QtCore.SIGNAL(_fromUtf8("triggered()")),
+            self.fileSave)
+        QtCore.QObject.connect(
+            self.actions["menu"]["saveas"],
+            QtCore.SIGNAL(_fromUtf8("triggered()")),
+            self.fileSaveAs)
         QtCore.QObject.connect(
             self.actions["menu"]["settings"],
             QtCore.SIGNAL(_fromUtf8("triggered()")),
@@ -286,13 +298,44 @@ class REApp(QtCore.QObject):
                 self.loadFileWith(path, instance)
 
     def newFileWith(self, instance):
-        instance.newFile()
+        path = "Untitled %d" % len(self.mapdocuments)
+        instance.newFile(path)
+        self.mapdocuments[path] = instance.get_document()
 
     def loadFileWith(self, path, instance):
         instance.loadFile(path)
+        self.mapdocuments[path] = instance.get_document()
 
     def setupPlugins(self):
 
         for plugin, instance in self.plugins_mgr.loaded_plugins.iteritems():
             name = plugin.split("#@#")[1]
             instance.setupPlugin(self.ui.tabContent)
+
+
+    def fileSave(self):
+        if not self.fileName:
+            return self.fileSaveAs()
+
+        f = open(self.fileName, 'w')
+        f.write(str(self.yaraEdit.document().toPlainText()))
+        f.close()
+        self.yaraEdit.document().setModified(False)
+        self.modelYara.refresh()
+        self.yaraTree.setRootIndex( self.modelYara.index(self.path_yara) );
+        return True
+
+    def fileSaveAs(self):
+        fn = QtGui.QFileDialog.getSaveFileName(self.mainwindow, "Save as...", self.path_yara,
+                "Yara files (*.yara);;HTML-Files (*.htm *.html);;All Files (*)")
+
+        if not fn:
+            return False
+
+        lfn = fn.lower()
+        if not lfn.endswith(('.yara', '.htm', '.html')):
+            # The default.
+            fn += '.yara'
+
+        self.setCurrentFileName(fn)
+        return self.fileSave()

@@ -96,13 +96,19 @@ class Editor(object):
         return True
 
 
-    def newFile(self):
+    def newFile(self, path):
         """
         New File
         :return:
         """
         self.setupUi()
+        position = self.tabContent.addTab(self.tab, _fromUtf8(path))
+        self.tab.setObjectName(_fromUtf8(path))
+        self.tabContent.setCurrentIndex(position)
 
+
+    def get_document(self):
+        return self.codeEdit.document()
 
     def setupUi(self):
         self.tab = QtGui.QWidget()
