@@ -85,10 +85,10 @@ class Editor(object):
         #self.setCurrentFileName(path)
 
         self.setupUi()
-        self.tabContent.addTab(self.tab, _fromUtf8(path))
+        position = self.tabContent.addTab(self.tab, _fromUtf8(path))
         self.tab.setObjectName(_fromUtf8(path))
         self.snortEdit.setPlainText(unistr)
-
+        self.tabContent.setCurrentIndex(position)
 
         return True
 

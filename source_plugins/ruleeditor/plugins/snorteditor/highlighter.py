@@ -10,7 +10,6 @@
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
-from PyQt4.QtCore import (QObject, Qt, SIGNAL, SLOT)
             
 
 class SnortHighlighter(QtGui.QSyntaxHighlighter):

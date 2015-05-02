@@ -14,7 +14,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import (QObject, Qt, QDir, SIGNAL, SLOT)
 
 from ruleeditor.plugins.ioceditor.ioctreewidget import IOCTreeWidget
-
+from ruleeditor.plugins.ioceditor.highlighter import IOCHighlighter
 from ruleeditor.plugins.codeeditor.codeeditor import CodeEditor
 
 
@@ -87,10 +87,11 @@ class Editor(object):
         #self.setCurrentFileName(path)
 
         self.setupUi()
-        self.tabContent.addTab(self.tab, _fromUtf8(os.path.basename(path)))
+        position = self.tabContent.addTab(self.tab, _fromUtf8(os.path.basename(path)))
         self.tab.setObjectName(_fromUtf8(path))
         self.iocEditor.setPlainText(unistr)
-
+        self.tabContent.setCurrentIndex(position)
+        
         self.iocWidget.load_ioc(unistr)
         self.path = path
         return True
@@ -150,6 +151,8 @@ class Editor(object):
         completer.setCaseSensitivity(Qt.CaseInsensitive)
         completer.setWrapAround(False)
         self.iocEditor.setCompleter(completer)
+
+        self.highlighter = IOCHighlighter(self.iocEditor.document())
 
         #Define Actions
         self.btnTextView.clicked.connect(self.display_text_view)
