@@ -225,12 +225,17 @@ class REApp(QtCore.QObject):
             name = plugin.split("#@#")[1]
 
             item = QtGui.QTableWidgetItem()
+
             ui.listPlugin.setVerticalHeaderItem(nRow, item)
 
             itemName = QtGui.QTableWidgetItem()
             itemName.setText(name)
             itemExt = QtGui.QTableWidgetItem()
             itemExt.setText(";".join(instance.allowFormat()))
+
+            itemName.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEnabled)
+            itemExt.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEnabled)
+
             ui.listPlugin.setItem(nRow, 0, itemName)
             ui.listPlugin.setItem(nRow, 1, itemExt)
 
@@ -291,4 +296,3 @@ class REApp(QtCore.QObject):
         for plugin, instance in self.plugins_mgr.loaded_plugins.iteritems():
             name = plugin.split("#@#")[1]
             instance.setupPlugin(self.ui.tabContent)
-
