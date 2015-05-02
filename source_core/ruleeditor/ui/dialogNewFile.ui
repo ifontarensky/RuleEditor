@@ -6,18 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>350</width>
     <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Create New File</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTableWidget" name="listPlugin">
      <property name="alternatingRowColors">
       <bool>true</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
      </property>
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
@@ -37,6 +40,11 @@
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
+     <column>
+      <property name="text">
+       <string>Icon</string>
+      </property>
+     </column>
      <column>
       <property name="text">
        <string>Name</string>
