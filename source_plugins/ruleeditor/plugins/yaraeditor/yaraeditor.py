@@ -8,7 +8,12 @@ plugin_class = 'Editor'
 plugin_name = 'YaraEditor'
 
 import os
-import yara as yaraModule
+try:
+    import yara as yaraModule
+    yara_lib_found = True
+except Exception as error:
+    print "Probleme when loading Yara library", error
+    yara_lib_found = False
 
 
 from PyQt4 import QtCore, QtGui
@@ -166,16 +171,21 @@ class Editor(object):
         self.yaraEdit = self.yaraEdit
         self.highlighter = YaraHighlighter(self.yaraEdit.document())
 
+
         self.wPanel=QtGui.QWidget()
         self.uiPanel=Ui_PanelOption()
-        self.uiPanel.setupUi(self.wPanel)
 
-        self.uiPanel.btnBrowse.clicked.connect(self.open)
-        self.uiPanel.btnTest.clicked.connect(self.analyze)
-        self.uiPanel.btnHide.clicked.connect(self.showhide)
-        self.uiPanel.editPathMalware.textChanged.connect(self.textChanged)
+        if yara_lib_found:
+            self.uiPanel.setupUi(self.wPanel)
 
-        self.globalLayout.addWidget(self.wPanel)
+            self.uiPanel.btnBrowse.clicked.connect(self.open)
+            self.uiPanel.btnTest.clicked.connect(self.analyze)
+            self.uiPanel.btnHide.clicked.connect(self.showhide)
+            self.uiPanel.editPathMalware.textChanged.connect(self.textChanged)
+
+            self.globalLayout.addWidget(self.wPanel)
+        else:
+            self.wPanel.setVisible(False)
 
 
     def open(self):
