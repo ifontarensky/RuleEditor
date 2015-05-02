@@ -108,13 +108,37 @@ class Editor(object):
 
 
     def get_document(self):
-        return self.codeEdit.document()
+        return self.snortEdit.document()
+
+    def get_icon(self):
+        return None
+
+    def fileSave(self, path, document):
+
+        with open(path, 'w') as handle:
+            handle.write(str(document.toPlainText()))
+
+        document.setModified(False)
+
+        return True
+
+    def fileSaveAs(self, document):
+        fn = QtGui.QFileDialog.getSaveFileName(self.mainwindow, "Save as...", None,
+                "All Files (*)")
+
+        if not fn:
+            return False
+
+        if self.fileSave(fn, document):
+            return fn
+        else:
+            return None
 
     def setupUi(self):
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("Untitled"))
-        self.tabContent.addTab(self.tab, _fromUtf8("Untitled"))
-
+        index = self.tabContent.addTab(self.tab, _fromUtf8("Untitled"))
+        self.positionTab = index
         self.widgetEditor = self.tab
         self.horizontalLayout = QtGui.QHBoxLayout(self.widgetEditor)
         self.horizontalLayout.setMargin(0)

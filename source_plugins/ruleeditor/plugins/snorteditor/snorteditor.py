@@ -30,6 +30,7 @@ class Editor(object):
 
 
     def __init__(self):
+        self.icon = QtGui.QIcon(QtGui.QPixmap(SNORT_XPM))
         pass
 
 
@@ -90,7 +91,7 @@ class Editor(object):
         self.tab.setObjectName(_fromUtf8(path))
         self.snortEdit.setPlainText(unistr)
         self.tabContent.setCurrentIndex(position)
-        self.tabContent.setTabIcon(position, QtGui.QIcon(QtGui.QPixmap(SNORT_XPM)))
+        self.tabContent.setTabIcon(position, self.icon)
 
 
         return True
@@ -108,6 +109,36 @@ class Editor(object):
 
     def get_document(self):
         return self.snortEdit.document()
+
+    def get_icon(self):
+        return self.icon
+
+    def fileSave(self, path, document):
+
+        with open(path, 'w') as handle:
+            handle.write(str(document.toPlainText()))
+
+        document.setModified(False)
+
+        return True
+
+    def fileSaveAs(self, document):
+        fn = QtGui.QFileDialog.getSaveFileName(self.mainwindow, "Save as...", None,
+                "Snort files (*.rules *snort);;HTML-Files (*.htm *.html);;All Files (*)")
+
+        if not fn:
+            return False
+
+        lfn = fn.lower()
+        if not lfn.endswith(('.rules', '.snort', '.htm', '.html')):
+            # The default.
+            fn += '.rules'
+
+        if self.fileSave(fn, document):
+            return fn
+        else:
+            return None
+
 
     def setupUi(self):
         self.tab = QtGui.QWidget()

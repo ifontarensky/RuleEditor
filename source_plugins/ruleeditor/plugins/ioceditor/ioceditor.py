@@ -30,6 +30,7 @@ class Editor(object):
 
 
     def __init__(self):
+        self.icon = QtGui.QIcon(QtGui.QPixmap(IOC_XPM))
         pass
 
 
@@ -90,7 +91,7 @@ class Editor(object):
         self.tab.setObjectName(_fromUtf8(path))
         self.iocEditor.setPlainText(unistr)
         self.tabContent.setCurrentIndex(position)
-        self.tabContent.setTabIcon(position, QtGui.QIcon(QtGui.QPixmap(IOC_XPM)))
+        self.tabContent.setTabIcon(position, self.icon)
 
         self.iocWidget.load_ioc(unistr)
         self.path = path
@@ -112,6 +113,35 @@ class Editor(object):
 
     def get_document(self):
         return self.iocEditor.document()
+
+    def get_icon(self):
+        return self.icon
+
+    def fileSave(self, path, document):
+
+        with open(path, 'w') as handle:
+            handle.write(str(document.toPlainText()))
+
+        document.setModified(False)
+
+        return True
+
+    def fileSaveAs(self, document):
+        fn = QtGui.QFileDialog.getSaveFileName(self.tabContent, "Save as...", None,
+                "IOC files (*.ioc);;HTML-Files (*.htm *.html);;All Files (*)")
+
+        if not fn:
+            return False
+
+        lfn = fn.lower()
+        if not lfn.endswith(('.ioc', '.htm', '.html')):
+            # The default.
+            fn += '.ioc'
+
+        if self.fileSave(fn, document):
+            return fn
+        else:
+            return None
 
 
     def setupUi(self):

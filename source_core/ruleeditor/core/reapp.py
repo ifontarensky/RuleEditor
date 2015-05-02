@@ -136,6 +136,28 @@ class REApp(QtCore.QObject):
         :param index:
         :return:
         """
+
+        indexToClose = self.ui.tabContent.currentIndex()
+
+        instance, document, path, ondisk = self.get_object_from_index(indexToClose)
+        modified = document.isModified()
+
+        if not ondisk or modified:
+            ret = QtGui.QMessageBox.warning(self.gui, "Application",
+                    "The document has been modified.\n"
+                    "Do you want to save your changes?",
+                    QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard |
+                            QtGui.QMessageBox.Cancel)
+
+            if ret == QtGui.QMessageBox.Cancel:
+                return False
+
+            if ret == QtGui.QMessageBox.Save:
+                self.fileSaveWithInstance(instance, document, path)
+
+            if ret == QtGui.QMessageBox.Discard:
+                pass
+
         self.ui.tabContent.removeTab(index)
 
 
@@ -244,20 +266,24 @@ class REApp(QtCore.QObject):
             itemName.setText(name)
             itemExt = QtGui.QTableWidgetItem()
             itemExt.setText(";".join(instance.allowFormat()))
+            itemIcon = QtGui.QTableWidgetItem()
+            itemIcon.setData(QtCore.Qt.DecorationRole,instance.get_icon())
 
             itemName.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEnabled)
             itemExt.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEnabled)
+            itemIcon.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEnabled)
 
-            ui.listPlugin.setItem(nRow, 0, itemName)
-            ui.listPlugin.setItem(nRow, 1, itemExt)
+            ui.listPlugin.setItem(nRow, 0, itemIcon)
+            ui.listPlugin.setItem(nRow, 1, itemName)
+            ui.listPlugin.setItem(nRow, 2, itemExt)
+
 
             plugins[name] = instance
 
             nRow += 1
 
-        newDialog.exec_()
-        if len(ui.listPlugin.selectedItems()) > 0:
-            plugin_name = ui.listPlugin.selectedItems()[0].text()
+        if newDialog.exec_() != 0 and len(ui.listPlugin.selectedItems()) > 0:
+            plugin_name = ui.listPlugin.selectedItems()[1].text()
             self.newFileWith(plugins[plugin_name])
 
 
@@ -300,11 +326,27 @@ class REApp(QtCore.QObject):
     def newFileWith(self, instance):
         path = "Untitled %d" % len(self.mapdocuments)
         instance.newFile(path)
-        self.mapdocuments[path] = instance.get_document()
+        self.mapdocuments[path] = {
+                "tab" : instance.tab,
+                "document" : instance.get_document(),
+                "instance" : instance,
+                "ondisk" : False
+        }
 
     def loadFileWith(self, path, instance):
-        instance.loadFile(path)
-        self.mapdocuments[path] = instance.get_document()
+
+        if path in self.mapdocuments.keys():
+            index = self.ui.tabContent.indexOf(self.mapdocuments[path]["tab"])
+            self.ui.tabContent.setPosition(index)
+
+        else:
+            instance.loadFile(path)
+            self.mapdocuments[path] = {
+                "tab" : instance.tab,
+                "document" : instance.get_document(),
+                "instance" : instance,
+                "ondisk" : True
+            }
 
     def setupPlugins(self):
 
@@ -313,29 +355,71 @@ class REApp(QtCore.QObject):
             instance.setupPlugin(self.ui.tabContent)
 
 
+    def get_object_from_index(self, index):
+        found = False
+        modified = False
+        path = None
+        document = None
+        instance = None
+        ondisk = None
+        for key, value in self.mapdocuments.iteritems():
+            if index == self.ui.tabContent.indexOf(value["tab"]):
+                path = key
+                document = value["document"]
+                instance = value["instance"]
+                ondisk = value["ondisk"]
+
+        for objet in [path, document, instance, ondisk]:
+            if objet == None:
+                ret = QtGui.QMessageBox.critical(self.gui, "Application",
+                        "Problem occured whan trying to save the document.\n"
+                        "Copy and Paste your work on other editor.")
+                return None, None, None, None
+
+        return instance, document, path, ondisk
+
+
     def fileSave(self):
-        if not self.fileName:
+        index = self.ui.tabContent.currentIndex()
+
+        instance, document, path, ondisk = self.get_object_from_index(index)
+
+        if ondisk:
+            return self.fileSaveWithInstance(instance, document, path)
+        else:
             return self.fileSaveAs()
 
-        f = open(self.fileName, 'w')
-        f.write(str(self.yaraEdit.document().toPlainText()))
-        f.close()
-        self.yaraEdit.document().setModified(False)
-        self.modelYara.refresh()
-        self.yaraTree.setRootIndex( self.modelYara.index(self.path_yara) );
-        return True
+
 
     def fileSaveAs(self):
-        fn = QtGui.QFileDialog.getSaveFileName(self.mainwindow, "Save as...", self.path_yara,
-                "Yara files (*.yara);;HTML-Files (*.htm *.html);;All Files (*)")
+        index = self.ui.tabContent.currentIndex()
 
-        if not fn:
+        instance, document, path, ondisk = self.get_object_from_index(index)
+
+        path_new = self.fileSaveAsWithInstance(instance, document)
+
+        if path_new == None:
+            ret = QtGui.QMessageBox.critical(self.gui, "Application",
+                    "Problem occured whan trying to save the document.\n")
             return False
 
-        lfn = fn.lower()
-        if not lfn.endswith(('.yara', '.htm', '.html')):
-            # The default.
-            fn += '.yara'
+        self.mapdocuments[path_new] =  {
+                "tab" : self.mapdocuments[path]["tab"],
+                "document" : document,
+                "instance" : instance,
+                "ondisk" : True
+            }
 
-        self.setCurrentFileName(fn)
-        return self.fileSave()
+
+        del self.mapdocuments[path]
+        self.ui.tabContent.setTabText(index,path_new)
+
+        return True
+
+
+    def fileSaveWithInstance(self,instance, document, path):
+        return instance.fileSave(path, document)
+
+    def fileSaveAsWithInstance(self,instance, document):
+        path = instance.fileSaveAs(document)
+        return path
