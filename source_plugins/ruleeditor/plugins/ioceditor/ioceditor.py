@@ -8,12 +8,14 @@ plugin_class = 'Editor'
 plugin_name = 'IOCEditor'
 
 import os
-
+import uuid
+import datetime
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import (QObject, Qt, QDir, SIGNAL, SLOT)
 
 from ruleeditor.plugins.ioceditor.ioctreewidget import IOCTreeWidget
+from ruleeditor.plugins.ioceditor.ioctreewidget import NEW_FILE
 from ruleeditor.plugins.ioceditor.highlighter import IOCHighlighter
 from ruleeditor.plugins.codeeditor.codeeditor import CodeEditor
 from ruleeditor.plugins.ioceditor.icons import IOC_XPM
@@ -130,7 +132,13 @@ class Editor(REPlugin):
         self.tabContent.setCurrentIndex(position)
         ## Define COlor
         self.tabContent.tabBar().setTabTextColor(position, QtCore.Qt.red)
-
+        dt = datetime.datetime.now().strftime( "%Y-%m-%dT%H:%M:%SZ")
+        unistr = NEW_FILE.replace('####DATE####', dt)
+        uid = str(uuid.uuid4())
+        unistr = unistr.replace('####GUID####', uid)
+        inst.iocWidget.load_ioc(unistr)
+        inst.path = path
+        return True
 
     def get_document(self, path):
         return self.get_instance(path).iocEditor.document()
@@ -218,6 +226,4 @@ class Editor(REPlugin):
         #Define Actions
         inst.btnTextView.clicked.connect(inst.display_text_view)
         inst.btnTreeView.clicked.connect(inst.display_tree_view)
-
-
 

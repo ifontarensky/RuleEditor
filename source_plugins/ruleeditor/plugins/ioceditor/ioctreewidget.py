@@ -1,9 +1,11 @@
 __author__ = 'ifontarensky'
 
 import os
+import uuid
 import xml.etree.ElementTree as ET
 
 from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import Qt
 
 from ruleeditor.plugins.ioceditor.IOCWidget import Ui_FormIOC
 from ruleeditor.plugins.ioceditor.iocterms import iocterms
@@ -17,6 +19,27 @@ ELEMENTS = ["short_description", "description", "authored_by", "authored_date",
 CONDITIONS = ["is", "contains", "matches", "starts-with", "ends-with", "greater-than", "less-than"]
 
 ATTRIB = ["operator"]
+
+NEW_FILE = """
+<ioc xmlns="http://schemas.mandiant.com/2010/ioc"
+    id="25a50f37-eac1-41a9-ac8d-4668df520dd1"
+    last-modified="2012-05-03T06:24:55"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <short_description></short_description>
+  <description></description>
+  <authored_by></authored_by>
+  <authored_date>####DATE####</authored_date>
+  <links>
+    <link rel="category"></link>
+  </links>
+  <definition>
+    <Indicator id="####GUID####" operator="AND">
+    </Indicator>
+  </definition>
+</ioc>
+
+"""
 
 class IOCTreeWidget(QtGui.QWidget):
 
@@ -36,6 +59,8 @@ class IOCTreeWidget(QtGui.QWidget):
         self.uiPanel.cbCondition.currentIndexChanged.connect(self.cbConditionChanged)
         self.uiPanel.editItem.textChanged.connect(self.editItemChanged)
         self.loadiocterms()
+        self.setContextMenuPolicy(Qt.CustomContextMenu);
+        self.customContextMenuRequested.connect(self.menuContextTree)
 
 
     def set_xmlns(self, xmlns):
@@ -89,6 +114,7 @@ class IOCTreeWidget(QtGui.QWidget):
 
 
     def load_ioc(self, data):
+        self.uiPanel.treeWidget.clear()
         self.root = ET.fromstring(data)
         self.parse_root(self.root)
 
@@ -276,3 +302,105 @@ class IOCTreeWidget(QtGui.QWidget):
                     c2.text = text
                     search = c1.attrib['search']
                     c2.attrib["type"] = self.iocterms[search]['type']
+
+
+    def menuContextTree(self, point):
+
+        # On définie le menu contextuel.
+        menu=QtGui.QMenu()
+
+        action_add_operator=menu.addAction("Add Operator")
+        QtCore.QObject.connect(action_add_operator, QtCore.SIGNAL("triggered()"), self.add_operator)
+
+        action_add_indicator=menu.addAction("Add Indicator")
+        QtCore.QObject.connect(action_add_indicator, QtCore.SIGNAL("triggered()"), self.add_indicator)
+
+        menu.addSeparator()
+
+        action_delete_item=menu.addAction("Delete Item")
+        QtCore.QObject.connect(action_delete_item, QtCore.SIGNAL("triggered()"), self.delete_item)
+
+        menu.exec_(QtGui.QCursor.pos())
+
+    def add_operator(self):
+        for item in self.uiPanel.treeWidget.selectedItems ():
+
+            for parent in self.root.findall(".//%s"%self.tag_Indicator):
+                if parent.attrib["id"] == item.text(5):
+                    #Create Child
+                    uid = str(uuid.uuid4())
+                    child = ET.SubElement(parent, self.tag_Indicator)
+                    child.attrib["id"]=uid
+                    child.attrib["operator"]="AND"
+                    self.indicators[uid] = QtGui.QTreeWidgetItem(self.indicators[item.text(5)])
+                    self.indicators[uid].setText(0, child.attrib["operator"])
+                    self.indicators[uid].setText(1, "operator")
+                    self.indicators[uid].setText(5, child.attrib["id"])
+                    self.indicators[uid].setExpanded(True)
+
+    def add_indicator(self):
+        for item in self.uiPanel.treeWidget.selectedItems ():
+
+            for parent in self.root.findall(".//%s"%self.tag_Indicator):
+                if parent.attrib["id"] == item.text(5):
+                    #Create Child
+                    uid = str(uuid.uuid4())
+                    indic_item = ET.SubElement(parent, self.tag_IndicatorItem)
+                    indic_item.attrib["id"]=uid
+                    indic_item.attrib["condition"]="is"
+
+                    context1 = ET.SubElement(indic_item, self.tag_Content)
+                    context1.attrib["type"]="md5"
+
+                    context2 = ET.SubElement(indic_item, self.tag_Context)
+                    context2.attrib["document"]="FileItem"
+                    context2.attrib["search"]="FileItem/Md5sum"
+                    context2.attrib["type"]="mir"
+
+
+                    op1 = context2.attrib["search"]
+                    op2 = ""
+                    condition = indic_item.attrib["condition"]
+
+                    self.indicators[uid] = QtGui.QTreeWidgetItem(self.indicators[item.text(5)])
+
+                    value = "{0} {1} {2}".format(op1, condition, op2)
+                    self.indicators[uid].setText(0, value)
+                    self.indicators[uid].setText(1, "indicatoritem")
+                    self.indicators[uid].setText(2, op1)
+                    self.indicators[uid].setText(3, condition)
+                    self.indicators[uid].setText(4, op2)
+                    self.indicators[uid].setText(5, uid)
+                    self.indicators[uid].setExpanded(True)
+                    flags = self.indicators[uid].flags()
+                    flags |= QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
+                    self.indicators[uid].setFlags(flags)
+
+    def delete_item(self):
+        for item in self.uiPanel.treeWidget.selectedItems ():
+
+            # Remove in memory
+            type =  item.text(1)
+            current_id = item.text(5)
+
+            if item.parent() == None:
+                QtGui.QMessageBox.warning(self.uiPanel.treeWidget, "Error",
+                        """
+    Can't delete root element
+                        """)
+
+
+            else:
+
+                parent_id =  item.parent().text(5)
+
+                parent = self.root.find('.//*[@id="%s"]' % (parent_id))
+                current =  self.root.find('.//*[@id="%s"]' % (current_id))
+
+                parent.remove(current)
+
+
+                # Remove in tree
+                index = item.parent().indexOfChild(item)
+                item.parent().takeChild(index)
+
