@@ -92,6 +92,14 @@ class IOCTreeWidget(QtGui.QWidget):
         self.root = ET.fromstring(data)
         self.parse_root(self.root)
 
+    def toPlainText(self):
+
+        self.root.attrib["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+        self.root.attrib["xmlns:xsd"] = "http://www.w3.org/2001/XMLSchema"
+        plaintext = ET.tostring(self.root)
+        plaintext = plaintext.replace('ns0:','')
+        plaintext = plaintext.replace(':ns0','')
+        return plaintext
 
 
     def parse_root(self, root):
@@ -146,6 +154,7 @@ class IOCTreeWidget(QtGui.QWidget):
                 self.indicators[child.attrib["id"]] = QtGui.QTreeWidgetItem(self.uiPanel.treeWidget)
                 self.indicators[child.attrib["id"]].setText(0, child.attrib["operator"])
                 self.indicators[child.attrib["id"]].setText(1, "operator")
+                self.indicators[child.attrib["id"]].setText(5, child.attrib["id"])
                 self.indicators[child.attrib["id"]].setExpanded(True)
                 self.parse_indicator(child, child.attrib["id"])
             else:
@@ -157,6 +166,7 @@ class IOCTreeWidget(QtGui.QWidget):
                 self.indicators[child.attrib["id"]] = QtGui.QTreeWidgetItem(self.indicators[parent_id])
                 self.indicators[child.attrib["id"]].setText(0, child.attrib["operator"])
                 self.indicators[child.attrib["id"]].setText(1, "operator")
+                self.indicators[child.attrib["id"]].setText(5, child.attrib["id"])
                 self.indicators[child.attrib["id"]].setExpanded(True)
                 self.parse_indicator(child, child.attrib["id"])
             elif child.tag == self.tag_IndicatorItem:
@@ -181,6 +191,7 @@ class IOCTreeWidget(QtGui.QWidget):
         self.indicators[current_id].setText(2, op1)
         self.indicators[current_id].setText(3, condition)
         self.indicators[current_id].setText(4, op2)
+        self.indicators[current_id].setText(5, current_id)
         self.indicators[current_id].setExpanded(True)
         flags = self.indicators[current_id].flags()
         flags |= QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
@@ -212,6 +223,10 @@ class IOCTreeWidget(QtGui.QWidget):
         for item in self.uiPanel.treeWidget.selectedItems ():
             item.setText(0,value)
 
+            for target in self.root.findall(".//%s"%self.tag_Indicator):
+                if target.attrib["id"] == item.text(5):
+                    target.attrib["operator"] = item.text(0)
+
     def cbItemChanged(self, index):
         text = self.uiPanel.cbItem.itemText(index)
         for item in self.uiPanel.treeWidget.selectedItems ():
@@ -219,12 +234,29 @@ class IOCTreeWidget(QtGui.QWidget):
             value = "{0} {1} {2}".format(text, item.text(3), item.text(4))
             item.setText(0, value)
 
+            # Modify Tree in memory
+            for target in self.root.findall(".//%s"%self.tag_IndicatorItem):
+                if target.attrib["id"] == item.text(5):
+                    for child in target:
+                        if 'document' in child.attrib.keys():
+                            type =  self.iocterms[text]['type']
+                            child.attrib['search'] = text
+                            child.attrib['document'] = text.split('/')[0]
+                            if child.attrib['document'] == "Network":
+                                child.attrib['type'] = "network"
+                            else:
+                                child.attrib['type'] = "mir"
+
     def cbConditionChanged(self, index):
         text = self.uiPanel.cbCondition.itemText(index)
         for item in self.uiPanel.treeWidget.selectedItems ():
             item.setText(3,text)
             value = "{0} {1} {2}".format(item.text(2), item.text(3), item.text(4))
             item.setText(0, value)
+            # Modify Tree in memory
+            for target in self.root.findall(".//%s"%self.tag_IndicatorItem):
+                if target.attrib["id"] == item.text(5):
+                    target.attrib["condition"]=text
 
     def editItemChanged(self, text):
 
@@ -232,3 +264,15 @@ class IOCTreeWidget(QtGui.QWidget):
             item.setText(4,text)
             value = "{0} {1} {2}".format(item.text(2), item.text(3), item.text(4))
             item.setText(0, value)
+
+            # Modify Tree in memory
+            for target in self.root.findall(".//%s"%self.tag_IndicatorItem):
+                if target.attrib["id"] == item.text(5):
+                    for child in target:
+                        if 'document' in child.attrib.keys():
+                            c1 = child
+                        else:
+                            c2 = child
+                    c2.text = text
+                    search = c1.attrib['search']
+                    c2.attrib["type"] = self.iocterms[search]['type']
