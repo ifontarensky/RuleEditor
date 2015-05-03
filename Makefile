@@ -92,6 +92,7 @@ linecount:
 compile-ui:
 	$(PYUIC4) ${SRCCOREDIR}/ruleeditor/ui/mainwindow.ui > ${SRCCOREDIR}/ruleeditor/ui/mainwindow.py
 	$(PYUIC4) ${SRCCOREDIR}/ruleeditor/ui/dialogNewFile.ui > ${SRCCOREDIR}/ruleeditor/ui/dialogNewFile.py
+	$(PYUIC4) ${SRCCOREDIR}/ruleeditor/ui/dialogSettings.ui > ${SRCCOREDIR}/ruleeditor/ui/dialogSettings.py
 	$(PYUIC4) ${SRCPLUGINDIR}/ruleeditor/plugins/ioceditor/IOCWidget.ui > ${SRCPLUGINDIR}/ruleeditor/plugins/ioceditor/IOCWidget.py
 
 

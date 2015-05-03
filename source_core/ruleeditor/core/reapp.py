@@ -110,6 +110,8 @@ class REApp(QtCore.QObject):
             "save" : self.ui.actionSave,
             "saveas" : self.ui.actionSaveAs,
             "settings" : self.ui.actionSettings,
+            "saveall" : self.ui.actionSave_All,
+            "closeall" : self.ui.actionClose_All,
             "about" : self.ui.actionAbout,
             "aboutQt" : self.ui.actionAbout_QT,
         }
@@ -134,6 +136,14 @@ class REApp(QtCore.QObject):
             self.actions["menu"]["settings"],
             QtCore.SIGNAL(_fromUtf8("triggered()")),
             self.editSettings)
+        QtCore.QObject.connect(
+            self.actions["menu"]["saveall"],
+            QtCore.SIGNAL(_fromUtf8("triggered()")),
+            self.document_saveall)
+        QtCore.QObject.connect(
+            self.actions["menu"]["closeall"],
+            QtCore.SIGNAL(_fromUtf8("triggered()")),
+            self.document_closeall)
         QtCore.QObject.connect(
             self.actions["menu"]["about"],
             QtCore.SIGNAL(_fromUtf8("triggered()")),
@@ -453,3 +463,15 @@ class REApp(QtCore.QObject):
     def editSettings(self):
         # création de la fenêtre principale
         self.settings.exec_()
+
+    def document_closeall(self):
+        for path in self.mapdocuments.keys():
+            index = self.ui.tabContent.indexOf(self.mapdocuments[path]["tab"])
+            self.close_handler(index)
+
+
+    def document_saveall(self):
+        for path in self.mapdocuments.keys():
+            index = self.ui.tabContent.indexOf(self.mapdocuments[path]["tab"])
+            plugin, document, path, ondisk = self.get_object_from_index(index)
+            self.fileSaveWithInstance(plugin, document, path)

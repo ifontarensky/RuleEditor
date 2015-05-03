@@ -34,6 +34,7 @@ class REPlugin(object):
 
     def __init__(self):
         self.openedfile=dict()
+        self.version = __version__
 
 
     def setupPlugin(self, tabContent):
