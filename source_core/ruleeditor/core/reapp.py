@@ -11,6 +11,8 @@
 __docformat__ = 'restructuredtext'
 __author__ = 'ifontarensky'
 
+VERSION = "1.0"
+AUTHOR = "Ivan Fontarensky"
 
 """
 This module is the core of the application: it
@@ -24,7 +26,7 @@ from PyQt4 import QtGui
 import os
 
 import ruleeditor.core.pluginsLoader as pluginsLoader
-
+import ruleeditor.core.settings as settings
 import ruleeditor.ui as reGUI
 
 from ruleeditor.ui.dialogNewFile import Ui_Dialog as Ui_DialogNew
@@ -47,7 +49,7 @@ class REApp(QtCore.QObject):
     """
 
 
-    def __init__(self):
+    def __init__(self, app):
         """
         Initialize the application.
 
@@ -70,6 +72,7 @@ class REApp(QtCore.QObject):
         # création de la fenêtre principale
         self.gui=QtGui.QMainWindow()
         self.ui=reGUI.mainwindow.Ui_MainWindow()
+        self.app = app
 
 
         self.actions = {
@@ -90,10 +93,12 @@ class REApp(QtCore.QObject):
 
         # affichage de la fenêtre principal
         self.ui.setupUi(self.gui)
+        self.setupSettings()
         self.setupActions()
         self.setupBrowser()
         self.setupBrowserContextMenu()
         self.setupPlugins()
+
 
         self.ui.tabContent.removeTab(0)
 
@@ -104,7 +109,9 @@ class REApp(QtCore.QObject):
             "open" : self.ui.actionOpen,
             "save" : self.ui.actionSave,
             "saveas" : self.ui.actionSaveAs,
-            "settings" : self.ui.actionSettings
+            "settings" : self.ui.actionSettings,
+            "about" : self.ui.actionAbout,
+            "aboutQt" : self.ui.actionAbout_QT,
         }
 
         QtCore.QObject.connect(
@@ -126,9 +133,17 @@ class REApp(QtCore.QObject):
         QtCore.QObject.connect(
             self.actions["menu"]["settings"],
             QtCore.SIGNAL(_fromUtf8("triggered()")),
-            self.browserrefresh)
-
+            self.editSettings)
+        QtCore.QObject.connect(
+            self.actions["menu"]["about"],
+            QtCore.SIGNAL(_fromUtf8("triggered()")),
+            self.about)
+        QtCore.QObject.connect(
+            self.actions["menu"]["aboutQt"],
+            QtCore.SIGNAL(_fromUtf8("triggered()")),
+            QtGui.qApp.aboutQt)
         self.ui.tabContent.tabCloseRequested.connect(self.close_handler)
+
 
     def close_handler(self, index):
         """
@@ -212,7 +227,18 @@ class REApp(QtCore.QObject):
                 QtCore.SIGNAL(_fromUtf8("triggered()")),
                 self.fileOpenWith)
 
+    def setupSettings(self):
+        self.settings = settings.Settings(self.app)
 
+    def about(self):
+        QtGui.QMessageBox.about(self.gui, "About",
+                """
+                Rule-Editor Version (%s)
+                Editor to write your rules
+                %s
+
+                https://github.com/ifontarensky/RuleEditor
+                """ % (VERSION,AUTHOR))
 
     def browserdoubleClicked(self, index):
         """
@@ -353,7 +379,7 @@ class REApp(QtCore.QObject):
         for plugin, instance in self.plugins_mgr.loaded_plugins.iteritems():
             name = plugin.split("#@#")[1]
             instance.setupPlugin(self.ui.tabContent)
-
+        self.settings.set_plugins(self.plugins_mgr)
 
     def get_object_from_index(self, index):
         found = False
@@ -423,3 +449,7 @@ class REApp(QtCore.QObject):
     def fileSaveAsWithInstance(self,plugin, document):
         path = plugin.fileSaveAs(document)
         return path
+
+    def editSettings(self):
+        # création de la fenêtre principale
+        self.settings.exec_()

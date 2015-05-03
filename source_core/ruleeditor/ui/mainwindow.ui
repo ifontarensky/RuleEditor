@@ -94,14 +94,16 @@
     </property>
     <addaction name="actionSettings"/>
    </widget>
-   <widget class="QMenu" name="menu">
+   <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>?</string>
     </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAbout_QT"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
-   <addaction name="menu"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen">
@@ -144,6 +146,16 @@
   <action name="actionSaveAs">
    <property name="text">
     <string>Save as ...</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionAbout_QT">
+   <property name="text">
+    <string>About &amp;QT</string>
    </property>
   </action>
  </widget>

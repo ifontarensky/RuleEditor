@@ -17,11 +17,9 @@ sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 
 import sys,os
-
 from PyQt4 import QtGui
 
 from ruleeditor.ui.mainwindow import Ui_MainWindow
-
 
 class app:
     index=-1
@@ -45,8 +43,9 @@ class app:
         self.app.setOrganizationName('RuleEditor')
         self.app.setApplicationName('RuleEditor')
 
+
         # Start the application
-        reapp = REApp()
+        reapp = REApp(self.app)
         reapp.gui.show()
 
         # Open file from command line
