@@ -31,10 +31,13 @@ class PluginIOCInstance():
     def display_text_view(self):
         self.iocEditor.setVisible(True)
         self.iocWidget.setVisible(False)
+        self.iocEditor.document().setPlainText(self.iocWidget.toPlainText())
 
     def display_tree_view(self):
         self.iocEditor.setVisible(False)
         self.iocWidget.setVisible(True)
+        data=self.iocEditor.document().toPlainText()
+        self.iocWidget.load_ioc(data)
 
 
 class Editor(REPlugin):
@@ -98,8 +101,6 @@ class Editor(REPlugin):
             text = doc.toPlainText()
 
             unistr = text
-
-        #self.setCurrentFileName(path)
 
         self.add_instance(path)
         inst = self.get_instance(path)
