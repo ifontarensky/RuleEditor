@@ -46,9 +46,11 @@ class Settings():
         for plugin, instance in self.plugins_mgr.loaded_plugins.iteritems():
             name = plugin.split("#@#")[1]
             item = QtGui.QTreeWidgetItem(self.ui.treePlugin)
-            item.setText(1, name)
+            item.setText(0, name)
+            item.setText(1, 'v%s' % instance.version)
             item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled )
-            item.setCheckState(0, QtCore.Qt.Checked);
+            item.setCheckState(0, QtCore.Qt.Checked)
+        self.ui.treePlugin.resizeColumnToContents(0)
 
 
     def clickRadioButton(self, value):

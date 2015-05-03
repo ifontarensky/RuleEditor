@@ -33,6 +33,7 @@ class Editor(REPlugin):
     def __init__(self):
         self.icon = QtGui.QIcon(QtGui.QPixmap(SNORT_XPM))
         self.openedfile=dict()
+        self.version = __version__
 
 
     def setupPlugin(self, tabContent):

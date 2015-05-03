@@ -3,7 +3,7 @@
 
 __author__ = 'ifontarensky'
 __docformat__ = 'restructuredtext'
-__version__ = '0.9'
+__version__ = '1.0'
 plugin_class = 'Editor'
 plugin_name = 'IOCEditor'
 
@@ -46,6 +46,7 @@ class Editor(REPlugin):
     def __init__(self):
         self.icon = QtGui.QIcon(QtGui.QPixmap(IOC_XPM))
         self.openedfile=dict()
+        self.version = __version__
 
     def setupPlugin(self, tabContent):
         """
