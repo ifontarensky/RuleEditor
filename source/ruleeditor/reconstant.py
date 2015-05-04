@@ -1,23 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-#       Author:  Vicent Mas - vmas@vitables.org
-
-"""
-Basic constant.
-
-This module indicates contants use in ``ruleeditor`` package
-Mac OS X boxes use the module as is.
-
-Misc variables:
-
-* __docformat__
-* INSTALLDIR
-* ICONDIR
-* DOCDIR
-* PLUGINSDIR
-"""
-
 
 __author__ = 'ifontarensky'
 __docformat__ = 'restructuredtext'

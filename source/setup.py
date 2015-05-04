@@ -18,7 +18,10 @@ setup(
         'ruleeditor/ui',
         'ruleeditor/core/',
         'ruleeditor/plugins',
-        'ruleeditor/plugins/codeeditor'],
+        'ruleeditor/plugins/codeeditor',
+        'ruleeditor/plugins/ioceditor',
+        'ruleeditor/plugins/snorteditor',
+        'ruleeditor/plugins/yaraeditor'],
     scripts = ['bin/rule-editor'],
     # Metadata
     author = 'Ivan Fontarensky',

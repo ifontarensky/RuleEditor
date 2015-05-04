@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/ifontarensky/Workspace/yara/RuleEditor/source_plugins/ruleeditor/plugins/ioceditor/IOCWidget.ui'
 #
-# Created: Sat May  2 18:02:39 2015
+# Created: Sun May  3 17:41:19 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!

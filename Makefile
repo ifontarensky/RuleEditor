@@ -6,8 +6,7 @@ VENVDIR    = $(CURDIR)/virtualenv
 RESULTDIR  = $(CURDIR)/results
 REQUIREDIR = $(CURDIR)/requirements
 
-SRCCOREDIR = $(CURDIR)/source_core
-SRCPLUGINDIR = $(CURDIR)/source_plugins
+SRCCOREDIR = $(CURDIR)/source
 
 # Commands.
 VIRTUALENV = virtualenv
@@ -93,34 +92,23 @@ compile-ui:
 	$(PYUIC4) ${SRCCOREDIR}/ruleeditor/ui/mainwindow.ui > ${SRCCOREDIR}/ruleeditor/ui/mainwindow.py
 	$(PYUIC4) ${SRCCOREDIR}/ruleeditor/ui/dialogNewFile.ui > ${SRCCOREDIR}/ruleeditor/ui/dialogNewFile.py
 	$(PYUIC4) ${SRCCOREDIR}/ruleeditor/ui/dialogSettings.ui > ${SRCCOREDIR}/ruleeditor/ui/dialogSettings.py
-	$(PYUIC4) ${SRCPLUGINDIR}/ruleeditor/plugins/ioceditor/IOCWidget.ui > ${SRCPLUGINDIR}/ruleeditor/plugins/ioceditor/IOCWidget.py
+	$(PYUIC4) ${SRCCOREDIR}/ruleeditor/plugins/ioceditor/IOCWidget.ui > ${SRCCOREDIR}/ruleeditor/plugins/ioceditor/IOCWidget.py
 
 
-install-app: compile-ui package-core
+install-app: compile-ui package
 	$(PIP) install --no-index $(RESULTDIR)/rule_editor-*.whl
 
-install-plugins: package-plugins
-	$(PIP) install --no-index $(RESULTDIR)/plugins_ruleeditor-*.whl
-
-package-core:
+package:
 	mkdir -p $(RESULTDIR)
 	cd ${SRCCOREDIR} && python setup.py bdist_wheel
 	cp ${SRCCOREDIR}/dist/*.whl $(RESULTDIR)
 
-package-plugins:
-	mkdir -p $(RESULTDIR)
-	cd ${SRCPLUGINDIR} && python setup.py bdist_wheel
-	cp ${SRCPLUGINDIR}/dist/*.whl $(RESULTDIR)
-
 clean-tmp:
 	rm -rf $(VENVDIR)/lib/python2.7/site-packages/ruleeditor
 	rm -rf $(RESULTDIR)
-	rm -rf $(SRCPLUGINDIR)/dist
-	rm -rf $(SRCPLUGINDIR)/build
-	rm -rf $(SRCPLUGINDIR)/plugins_ruleeditor.egg-info
 	rm -rf $(SRCCOREDIR)/dist
 	rm -rf $(SRCCOREDIR)/build
 	rm -rf $(SRCCOREDIR)/rule_editor.egg-info
 
-run: clean-tmp install-app install-plugins
+run: clean-tmp install-app
 	. $(VENVDIR)/bin/activate; rule-editor
